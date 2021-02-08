@@ -55,6 +55,7 @@ public class ReactDiffuseModel {
         thresh();
     }
 
+    //copy oldT dans newT
     private void copy(double[][] oldT, double[][] newT) {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -87,6 +88,8 @@ public class ReactDiffuseModel {
         }
     }
 
+    //Diffuse la valeur table[x][y] aux 8 cases autour
+    //j'utilise deux tableau pour faire la mise a jour en une fois
     private void diffuseParam(int x, int y, double[][] table, double[][] temp) {
         double v = table[x][y] / 10 / 8;
         int roundDownY = roundDown(y - 1);
@@ -116,7 +119,9 @@ public class ReactDiffuseModel {
         }
     }
 
+    //seuillage
     private void thresh() {
+        //En mode niveau de gris sur A
         if (gray) {
             double max = 0;
             for (int x = 0; x < size; x++) {
@@ -132,18 +137,20 @@ public class ReactDiffuseModel {
                 model.setRGB(x, y, new Color(grey, grey, grey).getRGB());
                 }
             }
-        }
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                if (arguments.getTHRESHOLD_ACTIVATION() > a[x][y]) {
-                    model.setRGB(x, y, colorBelowThres);
-                } else {
-                    model.setRGB(x, y, colorOverThres);
+        } else {//Mode avec seuil
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    if (arguments.getTHRESHOLD_ACTIVATION() > a[x][y]) {
+                        model.setRGB(x, y, colorBelowThres);
+                    } else {
+                        model.setRGB(x, y, colorOverThres);
+                    }
                 }
             }
         }
     }
 
+    //affiche le niveau moyen de A
     public void printStats() {
         double sum = 0;
         for (int x = 0; x < size; x++) {
