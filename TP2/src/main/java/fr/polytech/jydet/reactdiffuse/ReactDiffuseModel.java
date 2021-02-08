@@ -91,22 +91,24 @@ public class ReactDiffuseModel {
     //Diffuse la valeur table[x][y] aux 8 cases autour
     //j'utilise deux tableau pour faire la mise a jour en une fois
     private void diffuseParam(int x, int y, double[][] table, double[][] temp) {
-        double v = table[x][y] / 10 / 8;
+        double tx_diff = 0.1;
+        double v = table[x][y] * tx_diff;
+        double vPerNeighbour = v / 8;
         int roundDownY = roundDown(y - 1);
         int roundUpY = roundUp(y + 1);
         int roundDownX = roundDown(x - 1);
         int roundUpX = roundUp(x + 1);
 
-        temp[x][roundUpX] = table[x][roundUpX] + v;
-        temp[x][roundDownY] = table[x][roundDownY] + v;
-        temp[roundUpX][y] = table[roundUpX][y] + v;
-        temp[roundDownX][y] = table[roundDownX][y] + v;
-        temp[roundUpX][roundDownY] = table[roundUpX][roundDownY] + v;
-        temp[roundUpX][roundUpY] = table[roundUpX][roundUpY] + v;
-        temp[roundDownX][roundDownY] = table[roundDownX][roundDownY] + v;
-        temp[roundDownX][roundUpY] = table[roundDownX][roundUpY] + v;
+        temp[x][roundUpX] = table[x][roundUpX] + vPerNeighbour;
+        temp[x][roundDownY] = table[x][roundDownY] + vPerNeighbour;
+        temp[roundUpX][y] = table[roundUpX][y] + vPerNeighbour;
+        temp[roundDownX][y] = table[roundDownX][y] + vPerNeighbour;
+        temp[roundUpX][roundDownY] = table[roundUpX][roundDownY] + vPerNeighbour;
+        temp[roundUpX][roundUpY] = table[roundUpX][roundUpY] + vPerNeighbour;
+        temp[roundDownX][roundDownY] = table[roundDownX][roundDownY] + vPerNeighbour;
+        temp[roundDownX][roundUpY] = table[roundDownX][roundUpY] + vPerNeighbour;
 
-        temp[x][y] = table[x][y] * 0.9;
+        temp[x][y] = table[x][y] - v;
     }
 
     private void resorb() {
@@ -133,8 +135,8 @@ public class ReactDiffuseModel {
             }
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
-                float grey = (float) ((max - a[x][y]) / max);
-                model.setRGB(x, y, new Color(grey, grey, grey).getRGB());
+                    float grey = (float) ((max - a[x][y]) / max);
+                    model.setRGB(x, y, new Color(grey, grey, grey).getRGB());
                 }
             }
         } else {//Mode avec seuil
