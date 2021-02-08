@@ -109,6 +109,29 @@ public class ReactDiffuseModel {
         temp[roundDownX][roundUpY] = table[roundDownX][roundUpY] + vPerNeighbour;
 
         temp[x][y] = table[x][y] - v;
+
+
+        //on vérifie que le taux global reste identique
+       assert
+            temp[x][y] +
+            temp[x][roundUpX] +
+            temp[x][roundDownY] +
+            temp[roundUpX][y] +
+            temp[roundDownX][y] +
+            temp[roundUpX][roundDownY] +
+            temp[roundUpX][roundUpY] +
+            temp[roundDownX][roundDownY] +
+            temp[roundDownX][roundUpY]
+           ==
+            table[x][y] +
+            table[x][roundUpX] +
+            table[x][roundDownY] +
+            table[roundUpX][y] +
+            table[roundDownX][y] +
+            table[roundUpX][roundDownY] +
+            table[roundUpX][roundUpY] +
+            table[roundDownX][roundDownY] +
+            table[roundDownX][roundUpY];
     }
 
     private void resorb() {
