@@ -3,6 +3,7 @@ package fr.polytech.jydet.evol;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,10 @@ public class EvaluationFrame extends JFrame {
     public List<IndividualEvaluationPanel> panels = new ArrayList<>();
 
     //FIXME initialize grid size with argument
-    public EvaluationFrame(int pop_size) throws HeadlessException {
+    public EvaluationFrame(int pop_size, int imgSize, Runnable notify) throws HeadlessException {
         super("evaluation");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(500,500);
+        this.setSize(imgSize * 3 + 300,imgSize * 3 + 250 + 50);
         this.setResizable(false);
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(3, 3));
@@ -27,18 +28,27 @@ public class EvaluationFrame extends JFrame {
             panels.add(comp);
         }
 
-        this.setContentPane(panel);
+        JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(panel, BorderLayout.CENTER);
+        JButton validate = new JButton("Validate");
+        validate.addActionListener(a -> notify.run());
+        contentPane.add(validate, BorderLayout.SOUTH);
+        this.setContentPane(contentPane);
         this.setVisible(true);
 
     }
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new EvaluationFrame(9));
+        SwingUtilities.invokeLater(() -> new EvaluationFrame(9, 100, () -> {}));
     }
 
-    public Map<Integer, Integer> evaluate() {
+    public void beginEvaluate() {
         for (IndividualEvaluationPanel panel : panels) {
             panel.enterEvaluate();
         }
+    }
+
+    public Map<Integer, Integer> endEvaluate() {
         Map<Integer, Integer> res = panels.stream().collect(Collectors.toMap(i -> i.id, i -> i.slider.getValue()));
         for (IndividualEvaluationPanel panel : panels) {
             panel.exitEvaluate();
@@ -56,7 +66,7 @@ public class EvaluationFrame extends JFrame {
             this.id = id;
             imageResult = new JLabel();
             this.add(imageResult);
-            this.add(new JLabel("Individu " + id));
+            this.add(new JLabel( Integer.toString(id)));
             slider = new JSlider(0, 5);
             slider.setMinorTickSpacing(1);
             slider.setMajorTickSpacing(1);
@@ -67,6 +77,9 @@ public class EvaluationFrame extends JFrame {
             sliderPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
             sliderPanel.add(slider);
             this.add(sliderPanel);
+            enterEvaluate();
+            exitEvaluate();
+            updateImage();
         }
 
         public void enterEvaluate() {
@@ -76,6 +89,13 @@ public class EvaluationFrame extends JFrame {
 
         public void exitEvaluate() {
             slider.setEnabled(false);
+        }
+
+        public void updateImage() {
+            if (imageResult.getIcon() != null) {
+                ((ImageIcon) imageResult.getIcon()).getImage().flush();
+            }
+            imageResult.setIcon(new ImageIcon(id + ".png"));
         }
     }
 }
