@@ -21,5 +21,8 @@ public class ReactDiffuseArguments {
     private double TX_RESO = 0.06;
 
     @Option(name = "-sa", aliases = "--seilActivation", usage = "Seuil d'activation")
-    private double THRESHOLD_ACTIVATION = 122;
+    private double THRESHOLD_ACTIVATION = 90;
+
+    @Option(name = "-sau", aliases = "--seilActivationHaut", usage = "Seuil d'activation haut")
+    private double THRESHOLD_ACTIVATION_UPPER = 125;
 }

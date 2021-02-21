@@ -18,14 +18,16 @@ public class ReactDiffuseModel {
     private final double[][] it;
     private final int colorBelowThres;
     private final int colorOverThres;
+    private final int colorMiddle;
     private final boolean gray;
 
     public ReactDiffuseModel(ReactDiffuseArguments arguments, int size) {
         this.arguments = arguments;
         this.size = size;
         gray = false;
-        colorBelowThres = new Color(255, 255, 255).getRGB();
-        colorOverThres = new Color(17, 74, 35).getRGB();
+        colorBelowThres = new Color(112, 56, 4, 255).getRGB();
+        colorMiddle = new Color(238, 124, 45).getRGB();
+        colorOverThres = new Color(255, 223, 0, 255).getRGB();
         this.model = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 
         a = new double[size][];
@@ -47,12 +49,14 @@ public class ReactDiffuseModel {
     }
 
     public void update() {
-        react();
-        copy(a, at); copy(i, it);
-        diffuseParam();
-        copy(at, a); copy(it, i);
-        resorb();
-        thresh();
+//        for (int j = 0; j < 10; j++) {
+            react();
+            copy(a, at); copy(i, it);
+            diffuseParam();
+            copy(at, a); copy(it, i);
+            resorb();
+            thresh();
+//        }
     }
 
     //copy oldT dans newT
@@ -165,10 +169,12 @@ public class ReactDiffuseModel {
         } else {//Mode avec seuil
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
-                    if (arguments.getTHRESHOLD_ACTIVATION() > a[x][y]) {
-                        model.setRGB(x, y, colorBelowThres);
-                    } else {
+                    if (arguments.getTHRESHOLD_ACTIVATION_UPPER() > a[x][y]) {
                         model.setRGB(x, y, colorOverThres);
+                    } else if (arguments.getTHRESHOLD_ACTIVATION() > a[x][y]) {
+                        model.setRGB(x, y, colorMiddle);
+                    } else {
+                        model.setRGB(x, y, colorBelowThres);
                     }
                 }
             }

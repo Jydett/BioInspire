@@ -18,7 +18,7 @@ public class Evolutionary {
 
     private static final int POP_SIZE = 9;
     private static final int IMAGE_SIZE = 100;
-    public static final int TURING_ITERATION = 15;
+    public static final int TURING_ITERATION = 10;
     private EvaluationFrame evaluationFrame;
     private static CountDownLatch initLatch;
     private CountDownLatch evalLatch;

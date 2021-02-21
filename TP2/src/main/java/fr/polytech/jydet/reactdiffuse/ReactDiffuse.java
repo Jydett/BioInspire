@@ -93,7 +93,7 @@ public class ReactDiffuse extends JFrame {
     }
 
     private static void tickAndSave() {
-        images.add(deepCopy(reactDiffuses[0].model.getModel()));
+//        images.add(deepCopy(reactDiffuses[0].model.getModel()));
         reactDiffuses[0].tick();
         reactDiffuses[0].repaint();
         reactDiffuses[0].model.printStats();
