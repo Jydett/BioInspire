@@ -15,14 +15,14 @@ public class EvaluationFrame extends JFrame {
     public List<IndividualEvaluationPanel> panels = new ArrayList<>();
 
     //FIXME initialize grid size with argument
-    public EvaluationFrame(int pop_size, int imgSize, Runnable notify) throws HeadlessException {
+    public EvaluationFrame(int width, int height, int imgSize, Runnable notify, Runnable saveArgs) throws HeadlessException {
         super("evaluation");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(imgSize * 3 + 300,imgSize * 3 + 250 + 50);
+        this.setSize(imgSize * width + width * 100,imgSize * height + height * 100);
         this.setResizable(false);
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 3));
-        for (int i = 0; i < pop_size; i++) {
+        panel.setLayout(new GridLayout(height, width));
+        for (int i = 0; i < (width * height); i++) {
             IndividualEvaluationPanel comp = new IndividualEvaluationPanel(i);
             panel.add(comp);
             panels.add(comp);
@@ -33,13 +33,18 @@ public class EvaluationFrame extends JFrame {
         contentPane.add(panel, BorderLayout.CENTER);
         JButton validate = new JButton("Validate");
         validate.addActionListener(a -> notify.run());
-        contentPane.add(validate, BorderLayout.SOUTH);
+        JPanel bottom = new JPanel();
+        bottom.add(validate);
+        JButton saveArg = new JButton("Save");
+        bottom.add(saveArg);
+        saveArg.addActionListener(a -> saveArgs.run());
+        contentPane.add(bottom, BorderLayout.SOUTH);
         this.setContentPane(contentPane);
         this.setVisible(true);
 
     }
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new EvaluationFrame(9, 100, () -> {}));
+        SwingUtilities.invokeLater(() -> new EvaluationFrame(3, 3, 100, () -> {}, () -> {}));
     }
 
     public void beginEvaluate() {

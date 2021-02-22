@@ -17,12 +17,6 @@ public class HistogramEx {
             values[i] = Math.random();
         }
 
-        var dataset = new ScalableXYDataset(1000);
-        dataset.addSeries("key", values, 100, 0, 1);
 
-        JFreeChart histogram = ChartFactory.createHistogram("",
-            "classes", "instances / 1000", dataset);
-
-        ChartUtils.saveChartAsPNG(new File("histogram.png"), histogram, 1000, 400);
     }
 }

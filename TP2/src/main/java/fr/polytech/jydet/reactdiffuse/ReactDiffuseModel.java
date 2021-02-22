@@ -25,9 +25,9 @@ public class ReactDiffuseModel {
         this.arguments = arguments;
         this.size = size;
         gray = false;
-        colorBelowThres = new Color(112, 56, 4, 255).getRGB();
+        colorOverThres = new Color(112, 56, 4, 255).getRGB();
         colorMiddle = new Color(238, 124, 45).getRGB();
-        colorOverThres = new Color(255, 223, 0, 255).getRGB();
+        colorBelowThres = new Color(238, 204, 135).getRGB();
         this.model = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 
         a = new double[size][];
@@ -103,39 +103,16 @@ public class ReactDiffuseModel {
         int roundDownX = roundDown(x - 1);
         int roundUpX = roundUp(x + 1);
 
-        temp[x][roundUpX] = table[x][roundUpX] + vPerNeighbour;
-        temp[x][roundDownY] = table[x][roundDownY] + vPerNeighbour;
-        temp[roundUpX][y] = table[roundUpX][y] + vPerNeighbour;
-        temp[roundDownX][y] = table[roundDownX][y] + vPerNeighbour;
-        temp[roundUpX][roundDownY] = table[roundUpX][roundDownY] + vPerNeighbour;
-        temp[roundUpX][roundUpY] = table[roundUpX][roundUpY] + vPerNeighbour;
-        temp[roundDownX][roundDownY] = table[roundDownX][roundDownY] + vPerNeighbour;
-        temp[roundDownX][roundUpY] = table[roundDownX][roundUpY] + vPerNeighbour;
+        temp[x][roundUpX] += vPerNeighbour;
+        temp[x][roundDownY] += vPerNeighbour;
+        temp[roundUpX][y] += vPerNeighbour;
+        temp[roundDownX][y] += vPerNeighbour;
+        temp[roundUpX][roundDownY] += vPerNeighbour;
+        temp[roundUpX][roundUpY] += vPerNeighbour;
+        temp[roundDownX][roundDownY] += vPerNeighbour;
+        temp[roundDownX][roundUpY] += vPerNeighbour;
 
-        temp[x][y] = table[x][y] - v;
-
-
-        //on vérifie que le taux global reste identique
-       assert
-            temp[x][y] +
-            temp[x][roundUpX] +
-            temp[x][roundDownY] +
-            temp[roundUpX][y] +
-            temp[roundDownX][y] +
-            temp[roundUpX][roundDownY] +
-            temp[roundUpX][roundUpY] +
-            temp[roundDownX][roundDownY] +
-            temp[roundDownX][roundUpY]
-           ==
-            table[x][y] +
-            table[x][roundUpX] +
-            table[x][roundDownY] +
-            table[roundUpX][y] +
-            table[roundDownX][y] +
-            table[roundUpX][roundDownY] +
-            table[roundUpX][roundUpY] +
-            table[roundDownX][roundDownY] +
-            table[roundDownX][roundUpY];
+        temp[x][y] -= v;
     }
 
     private void resorb() {
@@ -169,9 +146,9 @@ public class ReactDiffuseModel {
         } else {//Mode avec seuil
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
-                    if (arguments.getTHRESHOLD_ACTIVATION_UPPER() > a[x][y]) {
+                    if (arguments.getTHRESHOLD_ACTIVATION_UPPER() < a[x][y]) {
                         model.setRGB(x, y, colorOverThres);
-                    } else if (arguments.getTHRESHOLD_ACTIVATION() > a[x][y]) {
+                    } else if (arguments.getTHRESHOLD_ACTIVATION() < a[x][y]) {
                         model.setRGB(x, y, colorMiddle);
                     } else {
                         model.setRGB(x, y, colorBelowThres);
@@ -189,7 +166,7 @@ public class ReactDiffuseModel {
                 sum += a[x][y];
             }
         }
-        System.out.println("avg " + (sum/a.length));
+        System.out.println("avg " + (sum/(size * size)));
     }
 
     private int roundUp(int a) {

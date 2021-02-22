@@ -1,11 +1,14 @@
 package fr.polytech.jydet.evol;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fr.polytech.jydet.reactdiffuse.ReactDiffuseArguments;
 import fr.polytech.jydet.reactdiffuse.ReactDiffuseImageProxy;
 import fr.polytech.jydet.reactdiffuse.ReactDiffuseModel;
 import fr.polytech.jydet.utils.Tuple;
 
 import javax.swing.SwingUtilities;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,18 +19,36 @@ import java.util.stream.Collectors;
 
 public class Evolutionary {
 
-    private static final int POP_SIZE = 9;
+    private static final int COL = 5;
+    private static final int HEI = 5;
+
+    private static final int POP_SIZE = COL * HEI;
     private static final int IMAGE_SIZE = 100;
     public static final int TURING_ITERATION = 10;
     private EvaluationFrame evaluationFrame;
     private static CountDownLatch initLatch;
     private CountDownLatch evalLatch;
+    private List<Integer> toDelete = null;
 
     public static void main(String[] args) throws InterruptedException {
         initLatch = new CountDownLatch(1);
         Evolutionary evolutionary = new Evolutionary();
         SwingUtilities.invokeLater(() -> {
-            EvaluationFrame evaluationFrame = new EvaluationFrame(9, IMAGE_SIZE, () -> evolutionary.evalLatch.countDown());
+            EvaluationFrame evaluationFrame = new EvaluationFrame(COL, HEI, IMAGE_SIZE, () -> evolutionary.evalLatch.countDown(), () -> {
+                File parametersFile = new File("parameters.txt");
+                try {
+                    if (! parametersFile.exists()) {
+                        parametersFile.createNewFile();
+                    }
+                    FileWriter writer = new FileWriter(parametersFile);
+                    new GsonBuilder().setPrettyPrinting().create()
+                        .toJson(evolutionary.population.stream().map(a -> a.arguments).collect(Collectors.toList()), writer);
+                    writer.flush();
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
             evolutionary.evaluationFrame = evaluationFrame;
             initLatch.countDown();
         });
@@ -75,14 +96,14 @@ public class Evolutionary {
     private void compute() {
         try {
             ArrayList<Callable<Void>> callables = new ArrayList<>();
-            for (int i = 0; i < population.size(); i++) {
-                ReactDiffuseArgumentsWrapper argumentsWrapper = population.get(i);
-                int finalI = i;
-                callables.add(() -> {
-                    ReactDiffuseImageProxy proxy = new ReactDiffuseImageProxy(new ReactDiffuseModel(argumentsWrapper.arguments, IMAGE_SIZE), TURING_ITERATION);
-                    proxy.tickFullAndSave(finalI);
-                   return null;
-                });
+            if (toDelete == null) {
+                for (int i = 0; i < population.size(); i++) {
+                    computeCallableForImage(callables, i);
+                }
+            } else {
+                for (Integer i : toDelete) {
+                    computeCallableForImage(callables, i);
+                }
             }
             executorService.invokeAll(callables).forEach(f -> {
                 try {
@@ -96,6 +117,16 @@ public class Evolutionary {
         }
     }
 
+    private void computeCallableForImage(ArrayList<Callable<Void>> callables, int i) {
+        ReactDiffuseArgumentsWrapper argumentsWrapper = population.get(i);
+        int finalI = i;
+        callables.add(() -> {
+            ReactDiffuseImageProxy proxy = new ReactDiffuseImageProxy(new ReactDiffuseModel(argumentsWrapper.arguments, IMAGE_SIZE), TURING_ITERATION);
+            proxy.tickFullAndSave(finalI);
+            return null;
+        });
+    }
+
     private void evaluate(EvaluationFrame evaluationFrame) throws InterruptedException {
         evaluationFrame.beginEvaluate();
         evalLatch.await();
@@ -104,7 +135,7 @@ public class Evolutionary {
 
     private void reproduce() {
         Map<Boolean, List<Map.Entry<Integer, Integer>>> results = notesById.entrySet().stream()
-            .collect(Collectors.partitioningBy(e -> e.getValue() > 1));
+            .collect(Collectors.partitioningBy(e -> e.getValue() >= 1));
         List<Map.Entry<Integer, Integer>> toDelete = results.get(Boolean.FALSE);
         List<Map.Entry<Integer, Integer>> toKeep = results.get(Boolean.TRUE);
 
@@ -136,6 +167,7 @@ public class Evolutionary {
             //on recreer tout
             init();
         }
+        this.toDelete = toDelete.stream().map(e -> e.getKey()).collect(Collectors.toList());
         notesById.clear();
     }
 
