@@ -33,7 +33,7 @@ public class ReactDiffuse extends JFrame {
         super("React / Diffuse");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.arguments = arguments;
-        size = 200;
+        size = 20;
         model = new ReactDiffuseModel(arguments, size);
         ReactDiffusePanel contentPane = new ReactDiffusePanel();
         contentPane.addMouseListener(new MouseAdapter() {

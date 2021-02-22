@@ -30,9 +30,17 @@ public class ReactDiffuseArgumentsWrapper {
             for (Field field : newArg.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
                 if (field.getType() == double.class) {
-                    field.set(newArg, normalLaw.nextValue() * (double) field.get(parent1) - (double) field.get(parent2));
+                    double parent1Value = (Double) field.get(parent1);
+                    double parent2Value = (Double) field.get(parent2);
+                    double min = Math.min(parent2Value, parent1Value);
+                    double abs = Math.abs(parent1Value - parent2Value);
+                    field.set(newArg, normalLaw.nextValue() * abs + min);
                 } else if (field.getType() == int.class) {
-                    field.set(newArg, (int) (normalLaw.nextValue() * (int) field.get(parent1) - (int) field.get(parent2)));
+                    double parent1Value = ((Integer) field.get(parent1)).doubleValue();
+                    double parent2Value = ((Integer) field.get(parent2)).doubleValue();
+                    double min = Math.min(parent2Value, parent1Value);
+                    double abs = Math.abs(parent1Value - parent2Value);
+                    field.set(newArg, (int) (normalLaw.nextValue() * abs + min));
                 }
             }
         } catch (Exception e) {
@@ -50,9 +58,11 @@ public class ReactDiffuseArgumentsWrapper {
             for (Field field : newArg.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
                 if (field.getType() == double.class) {
-                    field.set(newArg, gaussLaw.nextValue() * (double) field.get(newArg));
+                    double oldValue = (double) field.get(newArg);
+                    field.set(newArg, oldValue + gaussLaw.nextValue() * oldValue * 0.5);
                 } else if (field.getType() == int.class) {
-                    field.set(newArg, (int) (gaussLaw.nextValue() * (int) field.get(newArg)));
+                    int oldValue = (int) field.get(newArg);
+                    field.set(newArg, (int) (oldValue + gaussLaw.nextValue() * oldValue * 0.5));
                 }
             }
         } catch (Exception e) {

@@ -80,12 +80,16 @@ public class ReactDiffuseModel {
     }
 
     private void diffuseParam() {
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                for (int i1 = 0; i1 < arguments.getSPEED_DIFF_A(); i1++) {
+        for (int i1 = 0; i1 < arguments.getSPEED_DIFF_A(); i1++) {
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
                     diffuseParam(x, y, a, at);
                 }
-                for (int i1 = 0; i1 < arguments.getSPEED_DIFF_I(); i1++) {
+            }
+        }
+        for (int i1 = 0; i1 < arguments.getSPEED_DIFF_I(); i1++) {
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
                     diffuseParam(x, y, i, it);
                 }
             }
@@ -103,7 +107,7 @@ public class ReactDiffuseModel {
         int roundDownX = roundDown(x - 1);
         int roundUpX = roundUp(x + 1);
 
-        temp[x][roundUpX] += vPerNeighbour;
+        temp[x][roundUpY] += vPerNeighbour;
         temp[x][roundDownY] += vPerNeighbour;
         temp[roundUpX][y] += vPerNeighbour;
         temp[roundDownX][y] += vPerNeighbour;

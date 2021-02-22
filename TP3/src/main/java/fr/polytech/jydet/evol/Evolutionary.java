@@ -1,19 +1,16 @@
 package fr.polytech.jydet.evol;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fr.polytech.jydet.reactdiffuse.ReactDiffuseArguments;
 import fr.polytech.jydet.reactdiffuse.ReactDiffuseImageProxy;
 import fr.polytech.jydet.reactdiffuse.ReactDiffuseModel;
 import fr.polytech.jydet.utils.Tuple;
 
-import javax.swing.SwingUtilities;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.swing.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -87,6 +84,7 @@ public class Evolutionary {
 
     private void init() {
         population.clear();
+        evaluationFrame.reset();
         //FIXME initiallisation tous identique
         for (int i = 0; i < POP_SIZE; i++) {
             population.add(new ReactDiffuseArgumentsWrapper(new ReactDiffuseArguments()));

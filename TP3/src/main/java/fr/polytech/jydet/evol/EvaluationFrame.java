@@ -3,18 +3,17 @@ package fr.polytech.jydet.evol;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class EvaluationFrame extends JFrame {
 
     public List<IndividualEvaluationPanel> panels = new ArrayList<>();
+    private final JPanel bottom;
+    private final JButton validate;
 
-    //FIXME initialize grid size with argument
     public EvaluationFrame(int width, int height, int imgSize, Runnable notify, Runnable saveArgs) throws HeadlessException {
         super("evaluation");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -31,9 +30,9 @@ public class EvaluationFrame extends JFrame {
         JPanel contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(panel, BorderLayout.CENTER);
-        JButton validate = new JButton("Validate");
+        validate = new JButton("Validate");
         validate.addActionListener(a -> notify.run());
-        JPanel bottom = new JPanel();
+        bottom = new JPanel();
         bottom.add(validate);
         JButton saveArg = new JButton("Save");
         bottom.add(saveArg);
@@ -48,12 +47,20 @@ public class EvaluationFrame extends JFrame {
     }
 
     public void beginEvaluate() {
+        bottom.setEnabled(true);
+        validate.setEnabled(true);
         for (IndividualEvaluationPanel panel : panels) {
             panel.enterEvaluate();
         }
     }
 
+    public void reset() {
+        panels.forEach(IndividualEvaluationPanel::reset);
+    }
+
     public Map<Integer, Integer> endEvaluate() {
+        bottom.setEnabled(false);
+        validate.setEnabled(false);
         Map<Integer, Integer> res = panels.stream().collect(Collectors.toMap(i -> i.id, i -> i.slider.getValue()));
         for (IndividualEvaluationPanel panel : panels) {
             panel.exitEvaluate();
@@ -78,6 +85,14 @@ public class EvaluationFrame extends JFrame {
             slider.setPaintTicks(true);
             slider.setPaintLabels(true);
             slider.setSnapToTicks(true);
+            slider.setValue(0);
+            slider.addChangeListener(e -> {
+                if (slider.getValue() > 0) {
+                    this.setBackground(Color.GREEN);
+                } else {
+                    this.setBackground(null);
+                }
+            });
             JPanel sliderPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
             sliderPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
             sliderPanel.add(slider);
@@ -87,8 +102,11 @@ public class EvaluationFrame extends JFrame {
             updateImage();
         }
 
-        public void enterEvaluate() {
+        public void reset() {
             slider.setValue(0);
+        }
+
+        public void enterEvaluate() {
             slider.setEnabled(true);
         }
 
