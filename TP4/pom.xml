@@ -9,8 +9,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
     <artifactId>TP4</artifactId>
+
     <dependencies>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>2.33</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -22,11 +32,17 @@
             <artifactId>surfaceplotter</artifactId>
             <version>2.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>TP1</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-
-    <properties>
-        <maven.compiler.source>12</maven.compiler.source>
-        <maven.compiler.target>12</maven.compiler.target>
-    </properties>
 
 </project>

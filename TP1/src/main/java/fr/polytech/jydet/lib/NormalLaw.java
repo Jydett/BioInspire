@@ -3,7 +3,7 @@ package fr.polytech.jydet.lib;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class NormalLaw {
+public class NormalLaw implements Law {
 
     private final double u;
     private final double eq;

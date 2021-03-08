@@ -1,4 +1,4 @@
-package fr.polytech.jydet.ofvr;
+package fr.polytech.jydet.ofvr._1;
 
 import lombok.AllArgsConstructor;
 
@@ -6,7 +6,7 @@ import java.util.Vector;
 import java.util.function.ToDoubleFunction;
 
 @AllArgsConstructor
-public class F0 implements ToDoubleFunction<Vector<Double>> {
+public class F0 implements F {
 
     private final int n;
 

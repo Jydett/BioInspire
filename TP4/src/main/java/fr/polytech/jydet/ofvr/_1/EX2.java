@@ -1,4 +1,4 @@
-package fr.polytech.jydet.ofvr;
+package fr.polytech.jydet.ofvr._1;
 
 import net.ericaro.surfaceplotter.JSurfacePanel;
 import net.ericaro.surfaceplotter.Mapper;
@@ -9,7 +9,7 @@ import java.awt.*;
 import java.util.Random;
 import java.util.Vector;
 
-public class Test {
+public class EX2 {
 
     public void testSomething() {
         JSurfacePanel jsp = new JSurfacePanel();
@@ -33,7 +33,8 @@ public class Test {
         }
 
 
-        F1 f1 = new F1(2);
+        F f = new F0(2);
+//        F f = new F1(2);
 
 
         ProgressiveSurfaceModel sm = new ProgressiveSurfaceModel();
@@ -43,7 +44,7 @@ public class Test {
                 Vector<Double> doubles = new Vector<>();
                 doubles.add((double)x);
                 doubles.add((double)y);
-                return (float)f1.applyAsDouble(doubles);
+                return (float)f.applyAsDouble(doubles);
 //                float r = x*x+y*y;
 //                if (r == 0 ) return 1f;
 //                return (float)( Math.sin(r)/(r));
@@ -62,7 +63,7 @@ public class Test {
         jsp.setModel(sm);
     }
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Test().testSomething());
+        SwingUtilities.invokeLater(() -> new EX2().testSomething());
 
     }
 
