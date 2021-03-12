@@ -53,7 +53,7 @@ public class EX4 {
         }
         var f = new Vector<CollectionElement>(mu);
         for (int i = 0; i < mu; i++) {
-            f.add(new CollectionElement("parent init ",i, toMinimize.applyAsDouble(X.get(i))));
+            f.add(new CollectionElement("parent init ",i, toMinimize.applyAsDouble(X.get(i)), X.get(i)));
         }
         var t = mu;
         CollectionElement best = null;
@@ -64,7 +64,7 @@ public class EX4 {
             }
             var fprime = new Vector<CollectionElement>(lambda);
             for (int i = 0; i < lambda; i++) {
-                fprime.add(new CollectionElement("enfant " + t, i,toMinimize.applyAsDouble(xprime.get(i))));
+                fprime.add(new CollectionElement("enfant " + t, i,toMinimize.applyAsDouble(xprime.get(i)), xprime.get(i)));
             }
 
             fprime.addAll(f);
@@ -73,8 +73,9 @@ public class EX4 {
             m.clear();
             for (int i = 0; i < n; i++) {
                 double sum = 0;
-                for (Double wi : w) {
-                    sum = sum + wi * fprime.get(i).value;
+                Vector<Double> x = fprime.get(i).x;
+                for (int j = 0; j < x.size(); j++) {
+                    sum = sum + w[j] * x.get(j);
                 }
                 m.add(sum);
             }
@@ -92,6 +93,7 @@ public class EX4 {
         String id;
         int position;
         double value;
+        Vector<Double> x;
     }
 
     private Double[] getW(int mu) {
