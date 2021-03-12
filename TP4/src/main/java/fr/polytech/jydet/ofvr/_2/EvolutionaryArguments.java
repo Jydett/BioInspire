@@ -1,6 +1,8 @@
 package fr.polytech.jydet.ofvr._2;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.kohsuke.args4j.Option;
 
 @Getter
@@ -10,7 +12,7 @@ public class EvolutionaryArguments {
     private int n;
 
     @Option(name = "-f", aliases = "--function", usage = "Fonction", required = true)
-    private boolean function;
+    private int function;
 
     @Option(name = "-s", aliases = "-stop", usage = "Condition d'arrêt", required = true)
     private int condition;
@@ -20,5 +22,8 @@ public class EvolutionaryArguments {
 
     @Option(name = "-m", aliases = "--mu", required = true)
     private int mu;
+
+    @Option(name = "-r", aliases = "--repeat")
+    private int repeat = 1;
 
 }

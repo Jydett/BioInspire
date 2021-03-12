@@ -12,10 +12,11 @@ public class F0 implements F {
 
     @Override
     public double applyAsDouble(Vector<Double> v) {
+        assert v.size() == n;
         double res = 0;
         for (int i = 0; i < n; i++) {
             double value = v.get(i);
-            res = value * value;
+            res = res + value * value;
         }
         return res;
     }

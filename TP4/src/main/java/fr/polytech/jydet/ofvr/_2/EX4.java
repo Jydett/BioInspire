@@ -1,33 +1,45 @@
 package fr.polytech.jydet.ofvr._2;
 
-import fr.polytech.jydet.ex2.LoiNormale;
 import fr.polytech.jydet.lib.NormalLaw;
 import fr.polytech.jydet.lib.UniformLaw;
 import fr.polytech.jydet.ofvr._1.F;
+import fr.polytech.jydet.ofvr._1.F0;
+import fr.polytech.jydet.ofvr._1.F1;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
 
 public class EX4 {
 
-    private NormalLaw normalLaw;
-
-    public EX4(EvolutionaryArguments args) {
-
+    public CollectionElement launch(EvolutionaryArguments args) {
+        int n = args.getN();
+        Vector<Double> b = new Vector<>(n);
+        Vector<Double> B = new Vector<>(n);
+        for (int i = 0; i < n; i++) {
+            b.add(-5d);
+            B.add(5d);
+        }
+        return work(args.getFunction() == 0 ? new F0(n) : new F1(n),
+            b,
+            B,
+            args.getLambda(),
+            args.getMu(),
+            args.getCondition());
     }
 
-    public void work(F toMinimize, Vector<Double> b, Vector<Double> B, int lambda, int mu, int maxEval) {
+    public CollectionElement work(F toMinimize, Vector<Double> b, Vector<Double> B, int lambda, int mu, int maxEval) {
+        int n = b.size();
         assert b.size() == B.size();
         var normalLaw = new NormalLaw(0, 1);
         var m = IntStream.range(0, b.size())
@@ -37,43 +49,47 @@ public class EX4 {
         var w = getW(mu);
         var X = new Vector<Vector<Double>>(mu);
         for (int i = 0; i < mu; i++) {
-            X.set(i, m.stream().map(v -> v + sigma * normalLaw.nextValue()).collect(toCollection(Vector::new)));
+            X.add(m.stream().map(v -> v + sigma * normalLaw.nextValue()).collect(toCollection(Vector::new)));
         }
         var f = new Vector<CollectionElement>(mu);
         for (int i = 0; i < mu; i++) {
-            f.set(i, new CollectionElement(i, toMinimize.applyAsDouble(X.get(i))));
+            f.add(new CollectionElement("parent init ",i, toMinimize.applyAsDouble(X.get(i))));
         }
         var t = mu;
+        CollectionElement best = null;
         while (t < maxEval) {
             var xprime = new Vector<Vector<Double>>(lambda); //children
             for (int i = 0; i < lambda; i++) {
-                xprime.set(i, m.stream().map(v -> v + sigma * normalLaw.nextValue()).collect(toCollection(Vector::new)));
+                xprime.add(m.stream().map(v -> v + sigma * normalLaw.nextValue()).collect(toCollection(Vector::new)));
             }
             var fprime = new Vector<CollectionElement>(lambda);
             for (int i = 0; i < lambda; i++) {
-                fprime.set(i, new CollectionElement(i, toMinimize.applyAsDouble(xprime.get(i))));
+                fprime.add(new CollectionElement("enfant " + t, i,toMinimize.applyAsDouble(xprime.get(i))));
             }
 
             fprime.addAll(f);
 
             fprime.sort(Comparator.comparingDouble(e -> e.value));
+            m.clear();
+            for (int i = 0; i < n; i++) {
+                double sum = 0;
+                for (Double wi : w) {
+                    sum = sum + wi * fprime.get(i).value;
+                }
+                m.add(sum);
+            }
             fprime.subList(lambda, fprime.size()).clear();//remove overflow
-
-
-        // TODO
-        //            for (int i = 0; i < lambda; i++) {
-        //                m = wi * X.get(i)
-        //                w[i] * fprime.get(i).value
-        //            }
-
+            best = fprime.get(0);
             t = t + lambda;
         }
-        return ;
+        return best;
     }
 
+    @ToString
     @Data
     @AllArgsConstructor
-    private class CollectionElement {
+    private static class CollectionElement {
+        String id;
         int position;
         double value;
     }
@@ -106,7 +122,35 @@ public class EX4 {
             parser.parseArgument(args);
         } catch (CmdLineException clEx) {
             System.err.println("ERROR: Unable to parse command-line options: " + clEx);
-            return;
         }
+
+        Vector<Double> res = new Vector<>(arguments.getRepeat());
+        Vector<Long> timeT = new Vector<>(arguments.getRepeat());
+
+        EX4 ex4 = new EX4();
+        for (int i = 0; i < arguments.getRepeat(); i++) {
+            System.out.println("Iteration " + i);
+            long time = System.currentTimeMillis();
+            CollectionElement resI = ex4.launch(arguments);
+            res.add(resI.value);
+            long endTime = System.currentTimeMillis();
+            long took = endTime - time;
+            timeT.add(took);
+            System.out.println("Took " + took + "ms -> " + resI);
+        }
+
+        double squareSum = 0;
+        double sum = 0;
+
+        for (double r : res) {
+            squareSum += r * r;
+            sum += r;
+        }
+
+        double average = sum / res.size();
+        double standDev = Math.sqrt(squareSum / res.size() - average * average);
+
+        System.out.println("Ecart type : " + standDev + " - Moyenne : " + average);
+        System.out.println("Durée moyenne : " + timeT.stream().mapToLong(l -> l).average());
     }
 }
