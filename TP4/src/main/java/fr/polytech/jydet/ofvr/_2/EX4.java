@@ -83,13 +83,13 @@ public class EX4 {
             m.clear();
             for (int i = 0; i < d; i++) {
                 double sum = 0;
-                Vector<Double> x = fprime.get(i).x;
-                for (int j = 0; j < x.size(); j++) {
-                    sum = sum + w[j] * x.get(j);
+                for (int j = 0; j < mu; j++) {
+                    sum = sum + w[j] * fprime.get(j).x.get(i);
                 }
                 m.add(sum);
             }
-            fprime.subList(lambda, fprime.size()).clear();//remove overflow
+            fprime.subList(mu, fprime.size()).clear();//remove overflow
+            f = fprime;
             best = fprime.get(0);
             t = t + lambda;
         }

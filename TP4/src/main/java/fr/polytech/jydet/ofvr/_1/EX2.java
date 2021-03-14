@@ -1,5 +1,6 @@
 package fr.polytech.jydet.ofvr._1;
 
+import fr.polytech.jydet.ofvr.ColorUtils;
 import fr.polytech.jydet.ofvr.Triplet;
 import net.ericaro.surfaceplotter.JSurfacePanel;
 import net.ericaro.surfaceplotter.Mapper;
@@ -159,8 +160,11 @@ public class EX2 {
 //            new Triplet<>(0f, 4f, 0f)
 //        ));
 
-        for (List<Triplet<Float, Float, Float>> points : points) {
-            for (Triplet<Float, Float, Float> point : points) {
+        for (int i = 0, pointsSize = points.size(); i < pointsSize; i++) {
+            color = new Color(ColorUtils.interpolation(((float) i) / pointsSize, Color.WHITE.getRGB(), Color.BLACK.getRGB()));
+            g.setColor(color);
+            List<Triplet<Float, Float, Float>> ps = points.get(i);
+            for (Triplet<Float, Float, Float> point : ps) {
                 point = scale(point, model);
                 Projector projector = jsp.getSurface().getModel().getProjector();
                 Point projectedTopA = projector.project(point.getA(), point.getB(), point.getC() - offsetXY);
@@ -178,8 +182,6 @@ public class EX2 {
 
                 g.drawLine(projectedTopA.x, projectedTopA.y, projectedBottomA.x, projectedBottomA.y);
             }
-            color = color.darker();
-            g.setColor(color);
         }
 
 //        for (Triplet<Float, Float, Float> point : points.get(lineIndex.get())) {
@@ -212,9 +214,6 @@ public class EX2 {
             (((-model.getYMin() + point.getB()) /sizeY) * 20 - 10),
             (((-model.getZMin() + point.getC()) /sizeZ) * 20 - 10)
         );
-//        ;
-//        ;
-//        ;
     }
 
     public static void main(String[] args) {
