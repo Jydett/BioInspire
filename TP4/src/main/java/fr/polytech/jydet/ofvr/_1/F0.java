@@ -16,6 +16,9 @@ public class F0 implements F {
         double res = 0;
         for (int i = 0; i < n; i++) {
             double value = v.get(i);
+            if (i == 0) {
+                value = value + 3;
+            }
             res = res + value * value;
         }
         return res;

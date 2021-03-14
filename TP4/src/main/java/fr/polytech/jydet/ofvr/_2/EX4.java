@@ -11,11 +11,16 @@ import lombok.ToString;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Vector;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toCollection;
@@ -23,7 +28,7 @@ import static java.util.stream.Collectors.toCollection;
 public class EX4 {
 
     public CollectionElement launch(EvolutionaryArguments args) {
-        int n = args.getN();
+        int n = args.getD();
         Vector<Double> b = new Vector<>(n);
         Vector<Double> B = new Vector<>(n);
         for (int i = 0; i < n; i++) {
@@ -39,7 +44,7 @@ public class EX4 {
     }
 
     public CollectionElement work(F toMinimize, Vector<Double> b, Vector<Double> B, int lambda, int mu, int maxEval) {
-        int n = b.size();
+        int d = b.size();
         assert b.size() == B.size();
         var normalLaw = new NormalLaw(0, 1);
         var m = IntStream.range(0, b.size())
@@ -55,6 +60,9 @@ public class EX4 {
         for (int i = 0; i < mu; i++) {
             f.add(new CollectionElement("parent init ",i, toMinimize.applyAsDouble(X.get(i)), X.get(i)));
         }
+
+        log(f, false);
+
         var t = mu;
         CollectionElement best = null;
         while (t < maxEval) {
@@ -67,11 +75,13 @@ public class EX4 {
                 fprime.add(new CollectionElement("enfant " + t, i,toMinimize.applyAsDouble(xprime.get(i)), xprime.get(i)));
             }
 
+            log(fprime, true);
+
             fprime.addAll(f);
 
             fprime.sort(Comparator.comparingDouble(e -> e.value));
             m.clear();
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < d; i++) {
                 double sum = 0;
                 Vector<Double> x = fprime.get(i).x;
                 for (int j = 0; j < x.size(); j++) {
@@ -84,6 +94,17 @@ public class EX4 {
             t = t + lambda;
         }
         return best;
+    }
+
+    private void log(Vector<CollectionElement> f, boolean append) {
+        try(FileWriter fileWriter = new FileWriter("log.txt", append)) {
+            if (append) fileWriter.write(System.lineSeparator());
+            fileWriter.write(f.stream().map(e ->
+                e.x.stream().map(Objects::toString).collect(Collectors.joining(":")) + ":" + e.value
+            ).collect(Collectors.joining("#")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @ToString
@@ -112,6 +133,7 @@ public class EX4 {
         for (int i = 1; i < d.size(); i++) {
             res[i - 1] = d.get(i) - d.get(i - 1);
         }
+        Arrays.sort(res, Collections.reverseOrder());
 
         return res;
     }

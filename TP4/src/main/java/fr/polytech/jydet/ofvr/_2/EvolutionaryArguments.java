@@ -9,7 +9,7 @@ import org.kohsuke.args4j.Option;
 public class EvolutionaryArguments {
 
     @Option(name = "-d", aliases = "--dimension", usage = "Dimension n du problème", required = true)
-    private int n;
+    private int d;
 
     @Option(name = "-f", aliases = "--function", usage = "Fonction", required = true)
     private int function;
