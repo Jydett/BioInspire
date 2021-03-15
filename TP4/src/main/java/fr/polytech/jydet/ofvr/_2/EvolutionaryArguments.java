@@ -25,5 +25,4 @@ public class EvolutionaryArguments {
 
     @Option(name = "-r", aliases = "--repeat")
     private int repeat = 1;
-
 }

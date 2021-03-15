@@ -2,6 +2,7 @@ package fr.polytech.jydet.ofvr._1;
 
 import lombok.AllArgsConstructor;
 
+import java.util.Random;
 import java.util.Vector;
 import java.util.function.ToDoubleFunction;
 
@@ -16,9 +17,6 @@ public class F0 implements F {
         double res = 0;
         for (int i = 0; i < n; i++) {
             double value = v.get(i);
-            if (i == 0) {
-                value = value + 3;
-            }
             res = res + value * value;
         }
         return res;

@@ -11,6 +11,7 @@ import lombok.ToString;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +29,11 @@ import static java.util.stream.Collectors.toCollection;
 public class EX4 {
 
     public CollectionElement launch(EvolutionaryArguments args) {
+        try {
+            new File("log.txt").delete();
+            new File("log7.txt").delete();
+        } catch (Exception ignored) { }
+
         int n = args.getD();
         Vector<Double> b = new Vector<>(n);
         Vector<Double> B = new Vector<>(n);
@@ -64,6 +70,7 @@ public class EX4 {
         log(f, false);
 
         var t = mu;
+        log7(t, f, false);
         CollectionElement best = null;
         while (t < maxEval) {
             var xprime = new Vector<Vector<Double>>(lambda); //children
@@ -74,8 +81,8 @@ public class EX4 {
             for (int i = 0; i < lambda; i++) {
                 fprime.add(new CollectionElement("enfant " + t, i,toMinimize.applyAsDouble(xprime.get(i)), xprime.get(i)));
             }
-
-            log(fprime, true);
+            log7(t, fprime, true);
+//            log(fprime, true);
 
             fprime.addAll(f);
 
@@ -96,6 +103,19 @@ public class EX4 {
         return best;
     }
 
+    private void log7(int t, Vector<CollectionElement> f, boolean append) {
+        double avg = f.stream().mapToDouble(x -> x.value).average().getAsDouble();
+        double max = f.stream().mapToDouble(x -> x.value).max().getAsDouble();
+
+        double dist = f.stream().mapToDouble(x -> f.stream().mapToDouble(xx -> Math.abs(xx.value - x.value)).sum() / f.size()).average().getAsDouble();
+        try(FileWriter fileWriter = new FileWriter("log7.txt", append)) {
+            if (append) fileWriter.write(System.lineSeparator());
+            fileWriter.write(t + " " + max + " " + avg + " " + dist);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void log(Vector<CollectionElement> f, boolean append) {
         try(FileWriter fileWriter = new FileWriter("log.txt", append)) {
             if (append) fileWriter.write(System.lineSeparator());
@@ -114,6 +134,7 @@ public class EX4 {
         String id;
         int position;
         double value;
+        //value of each dimention to generate this value
         Vector<Double> x;
     }
 
@@ -175,6 +196,6 @@ public class EX4 {
         double standDev = Math.sqrt(squareSum / res.size() - average * average);
 
         System.out.println("Ecart type : " + standDev + " - Moyenne : " + average);
-        System.out.println("Durée moyenne : " + timeT.stream().mapToLong(l -> l).average());
+        System.out.println("Durée moyenne : " + timeT.stream().mapToLong(l -> l).average().getAsDouble() + "ms");
     }
 }
