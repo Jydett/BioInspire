@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Vector;
@@ -56,7 +57,7 @@ public class EX4 {
         var m = IntStream.range(0, b.size())
                 .mapToObj(i -> new UniformLaw(b.get(i), B.get(i)).nextValue())
                 .collect(toCollection(Vector::new));
-        var sigma = 0.01d; //step_size
+        var sigma = 0.2d; //step_size
         var w = getW(mu);
         var X = new Vector<Vector<Double>>(mu);
         for (int i = 0; i < mu; i++) {
@@ -81,8 +82,8 @@ public class EX4 {
             for (int i = 0; i < lambda; i++) {
                 fprime.add(new CollectionElement("enfant " + t, i,toMinimize.applyAsDouble(xprime.get(i)), xprime.get(i)));
             }
-            log7(t, fprime, true);
-//            log(fprime, true);
+//            log7(t, fprime, true);
+            log(fprime, true);
 
             fprime.addAll(f);
 
@@ -184,18 +185,13 @@ public class EX4 {
             System.out.println("Took " + took + "ms -> " + resI);
         }
 
-        double squareSum = 0;
-        double sum = 0;
+        double mean = res.stream().mapToDouble(f -> f).average().getAsDouble();
+        double standartDev = Math.sqrt(res.stream()
+            .map(i -> i - mean)
+            .map(i -> i*i)
+            .mapToDouble(i -> i).average().getAsDouble());
 
-        for (double r : res) {
-            squareSum += r * r;
-            sum += r;
-        }
-
-        double average = sum / res.size();
-        double standDev = Math.sqrt(squareSum / res.size() - average * average);
-
-        System.out.println("Ecart type : " + standDev + " - Moyenne : " + average);
+        System.out.println("Ecart type : " + standartDev + " - Moyenne : " + mean);
         System.out.println("Durée moyenne : " + timeT.stream().mapToLong(l -> l).average().getAsDouble() + "ms");
     }
 }
