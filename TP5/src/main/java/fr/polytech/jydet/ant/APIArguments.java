@@ -14,7 +14,14 @@ public class APIArguments {
     @Option(name = "-s", aliases = "-stop", usage = "Condition d'arrêt", required = true)
     private int condition;
 
+    @Option(name = "-nr", aliases = "-nestRadius", usage = "Rayon de spamn des sites de chasse")
+    private double initialNestRadius = 3d;
 
+    @Option(name = "-ar", aliases = "-antRadius", usage = "Rayon d'action des fourmis sur un site")
+    private double antHuntRadius = 0.01d;
+
+    @Option(name = "-b", aliases = "-boredom", usage = "Nombre d'echec consécutif avant de changer de site", required = true)
+    private int antBoredom;
 
     @Option(name = "-r", aliases = "--repeat")
     private int repeat = 1;

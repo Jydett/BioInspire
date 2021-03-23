@@ -68,7 +68,8 @@ public class EX2 {
 
 
 //        F f = new F0(2);
-        F f = new F1(2);
+//        F f = new F1(2);
+        F f = new F2(2);
 
 
         ProgressiveSurfaceModel sm = new ProgressiveSurfaceModel();
