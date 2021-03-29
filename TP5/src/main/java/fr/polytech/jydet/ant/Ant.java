@@ -4,20 +4,28 @@ import fr.polytech.jydet.utils.Tuple;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@RequiredArgsConstructor
 public class Ant {
+
+    private static final AtomicInteger idCounter = new AtomicInteger(0);
+    @Getter
+    private final int id;
+
     private Vector<Double> position;
     @Getter
     private HuntResult huntRes;
     private final Double reach;
     @Getter
     private final AtomicInteger failCounter = new AtomicInteger(0);
+
+    public Ant(Double reach) {
+        this.reach = reach;
+        this.id = idCounter.incrementAndGet();
+    }
 
     public void init(Vector<Double> randomLocInRange) {
         position = randomLocInRange;
@@ -47,16 +55,18 @@ public class Ant {
     private void searchAndLogAtPosition() {
         var valAtPos = API.function.applyAsDouble(position);
         if (huntRes == null) {
-            this.huntRes = new HuntResult(position, valAtPos, 1);
+            huntRes = new HuntResult(position, valAtPos, 1);
         } else {
-            if (this.huntRes.bestRes > valAtPos) {
-                this.huntRes.position = position;
-                this.huntRes.bestRes = valAtPos;
+            if (huntRes.bestRes > valAtPos) {
+//                System.out.println(ColorUtils.ANSI_GREEN + "test at " + position.get(0) + " " + position.get(1) + " -> " + valAtPos);
+                huntRes.position = position;
+                huntRes.bestRes = valAtPos;
                 failCounter.set(0);
             } else {
+//                System.out.println(ColorUtils.ANSI_RED + "test at " + position.get(0) + " " + position.get(1) + " -> " + valAtPos);
                 failCounter.incrementAndGet();
             }
-            this.huntRes.tries++;
+            huntRes.tries++;
         }
     }
 

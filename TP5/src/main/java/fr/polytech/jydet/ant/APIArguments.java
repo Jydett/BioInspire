@@ -18,7 +18,7 @@ public class APIArguments {
     private double initialNestRadius = 3d;
 
     @Option(name = "-ar", aliases = "-antRadius", usage = "Rayon d'action des fourmis sur un site")
-    private double antHuntRadius = 0.01d;
+    private double antHuntRadius = 0.1d;
 
     @Option(name = "-b", aliases = "-boredom", usage = "Nombre d'echec consécutif avant de changer de site", required = true)
     private int antBoredom;

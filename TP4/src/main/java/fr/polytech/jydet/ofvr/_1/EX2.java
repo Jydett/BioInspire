@@ -56,7 +56,7 @@ public class EX2 {
         jf.setVisible(true);
 
         Random rand = new Random();
-        int max = 10;
+        int max = 100;
         float[][] z1 = new float[max][max];
         float[][] z2 = new float[max][max];
         for (int i = 0; i < max; i++) {
@@ -66,20 +66,56 @@ public class EX2 {
             }
         }
 
-
-//        F f = new F0(2);
-//        F f = new F1(2);
-        F f = new F2(2);
-
+        F[] fs = new F[] {
+            new F0(2), new F1(2), new F2(2)
+        };
+        F f = null;
+        try {
+            String data = Files.readString(new File("logant.txt").toPath());
+            boolean first = true;
+            for (String s : data.split(System.lineSeparator())) {
+                if (first) {
+                    f = fs[Integer.parseInt(s)];
+                    first = false;
+                    continue;
+                }
+                ArrayList<Triplet<Float, Float, Float>> list = new ArrayList<>();
+                for (String couple : s.split("#")) {
+                    String[] split = couple.split(":");
+                    if (split.length == 3) {
+                        list.add(new Triplet<>(
+                                (float) Double.parseDouble(split[0]),
+                                (float) Double.parseDouble(split[1]),
+                                (float) Double.parseDouble(split[2])
+                            )
+                        );
+                    } else if (split.length == 4) {
+                        list.add(new Triplet<>(
+                                (float) Double.parseDouble(split[1]),
+                                (float) Double.parseDouble(split[2]),
+                                (float) Double.parseDouble(split[3])
+                            )
+                        );
+                    }
+                }
+                points.add(list);
+            }
+            System.out.println(points.get(lineIndex.get()));
+        } catch (IOException e) {
+            points.clear();
+            points.add(Collections.emptyList());
+            f = fs[0];
+        }
 
         ProgressiveSurfaceModel sm = new ProgressiveSurfaceModel();
+        F finalF = f;
         sm.setMapper(new Mapper() {
             public  float f1(float x, float y)
             {
                 Vector<Double> doubles = new Vector<>();
                 doubles.add((double)x);
                 doubles.add((double)y);
-                return (float)f.applyAsDouble(doubles);
+                return (float) finalF.applyAsDouble(doubles);
 //                float r = x*x+y*y;
 //                if (r == 0 ) return 1f;
 //                return (float)( Math.sin(r)/(r));
@@ -87,7 +123,10 @@ public class EX2 {
 
             public  float f2( float x, float y)
             {
-                return 0;
+                Vector<Double> doubles = new Vector<>();
+                doubles.add((double)x);
+                doubles.add((double)y);
+                return (float) fs[2].applyAsDouble(doubles);
             }
         });
         sm.setXMin(-5);
@@ -99,30 +138,7 @@ public class EX2 {
         sm.plot().execute();
         jsp.setModel(sm);
         JButton test = new JButton("0");
-        try {
-            String data = Files.readString(new File("log.txt").toPath());
-            for (String s : data.split(System.lineSeparator())) {
-                ArrayList<Triplet<Float, Float, Float>> list = new ArrayList<>();
-                for (String couple : s.split("#")) {
-                    String[] split = couple.split(":");
-                    if (split.length == 3) {
-                        list.add(new Triplet<>(
-                                (float) Double.parseDouble(split[0]),
-                                (float) Double.parseDouble(split[1]),
-                                (float) Double.parseDouble(split[2])
-                            )
-                        );
-                    }
-                }
-                points.add(list);
-            }
-            System.out.println(points.get(lineIndex.get()));
-        } catch (IOException e) {
-            points.clear();
-            points.add(Collections.emptyList());
 
-            test.setEnabled(false);
-        }
         try {
             Field configurationPanel = JSurfacePanel.class.getDeclaredField("configurationPanel");
             configurationPanel.setAccessible(true);

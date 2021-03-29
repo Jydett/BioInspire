@@ -7,14 +7,18 @@ import fr.polytech.jydet.utils.Tuple;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class API {
 
     Vector<Ant.HuntResult> abandonnedSite = new Vector<>();
+    private Double nestValue = Double.MAX_VALUE;
     Vector<Double> nest;
     Vector<Ant> colony;
     //par dimension borne min, borne max
@@ -45,11 +49,25 @@ public class API {
         for (int i = 0; i < apiArguments.getCondition(); i = i + colony.size()) {
             colony.forEach(ant -> {
                 ant.routine();
-                if (ant.getFailCounter().get() >= antBoredom) {
-                    abandonnedSite.add(ant.getHuntRes());
-                    ant.init(randomLocInRange());
+                try {
+                    fileWriter.write(ant.getId() + ":" + ant.getHuntRes().getPosition().stream().map(d -> Double.toString(d)).collect(Collectors.joining(":")));
+                    fileWriter.write(":" + ant.getHuntRes().getBestRes() + System.lineSeparator());
+                    if (ant.getFailCounter().get() >= antBoredom) {
+                        Ant.HuntResult huntRes = ant.getHuntRes();
+                        if (nestValue > huntRes.getBestRes()) {
+                            nestValue = huntRes.getBestRes();
+                            nest = huntRes.getPosition();
+                        }
+                        abandonnedSite.add(huntRes);
+                        ant.init(randomLocInRange());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             });
+            if (i % 1200 == 0) {
+                System.out.println(getBest());
+            }
         }
     }
 
@@ -74,40 +92,51 @@ public class API {
                     .filter(Objects ::nonNull),
                 abandonnedSite.stream())
             .mapToDouble(Ant.HuntResult :: getBestRes)
-            .max()
+            .min()
             .orElse(Double.NaN);
     }
 
+    public static FileWriter fileWriter;
+
     public static void main(String[] args) {
-        var arguments = new APIArguments();
-        var parser = new CmdLineParser(arguments);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException clEx) {
-            System.err.println("ERROR: Unable to parse command-line options: " + clEx);
+        try(var fw = new FileWriter("logant.txt", false)) {
+            fileWriter = fw;
+
+            var arguments = new APIArguments();
+            var parser = new CmdLineParser(arguments);
+            try {
+                parser.parseArgument(args);
+            } catch (CmdLineException clEx) {
+                System.err.println("ERROR: Unable to parse command-line options: " + clEx);
+            }
+
+            fileWriter.write(Objects.toString(arguments.getFunction()) + System.lineSeparator());
+
+            Vector<Double> res = new Vector<>(arguments.getRepeat());
+            Vector<Long> timeT = new Vector<>(arguments.getRepeat());
+
+            for (int i = 0; i < arguments.getRepeat(); i++) {
+                System.out.println("Iteration " + i);
+                long time = System.currentTimeMillis();
+                Double best = new API(arguments).getBest();
+                res.add(best);
+                long endTime = System.currentTimeMillis();
+                long took = endTime - time;
+                timeT.add(took);
+//                System.out.println("Took " + took + "ms -> " + best);
+            }
+
+            double mean = res.stream().mapToDouble(f -> f).average().getAsDouble();
+            double standartDev = Math.sqrt(res.stream()
+                .map(i -> i - mean)
+                .map(i -> i*i)
+                .mapToDouble(i -> i).average().getAsDouble());
+
+            System.out.println("Ecart type : " + standartDev + " - Moyenne : " + mean);
+            System.out.println("Durée moyenne : " + timeT.stream().mapToLong(l -> l).average().getAsDouble() + "ms");
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        Vector<Double> res = new Vector<>(arguments.getRepeat());
-        Vector<Long> timeT = new Vector<>(arguments.getRepeat());
-
-        for (int i = 0; i < arguments.getRepeat(); i++) {
-            System.out.println("Iteration " + i);
-            long time = System.currentTimeMillis();
-            Double best = new API(arguments).getBest();
-            res.add(best);
-            long endTime = System.currentTimeMillis();
-            long took = endTime - time;
-            timeT.add(took);
-            System.out.println("Took " + took + "ms -> " + best);
-        }
-
-        double mean = res.stream().mapToDouble(f -> f).average().getAsDouble();
-        double standartDev = Math.sqrt(res.stream()
-            .map(i -> i - mean)
-            .map(i -> i*i)
-            .mapToDouble(i -> i).average().getAsDouble());
-
-        System.out.println("Ecart type : " + standartDev + " - Moyenne : " + mean);
-        System.out.println("Durée moyenne : " + timeT.stream().mapToLong(l -> l).average().getAsDouble() + "ms");
     }
 }
